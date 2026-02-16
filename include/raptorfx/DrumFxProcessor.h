@@ -11,6 +11,7 @@ namespace raptorfx {
 class DrumFxProcessor {
 public:
     void prepare(double sampleRate, double tempoBpm);
+    void setTempoBpm(double tempoBpm);
     void setMacros(const MacroParameters& macros);
     void setAdvanced(const AdvancedParameters& advanced);
 

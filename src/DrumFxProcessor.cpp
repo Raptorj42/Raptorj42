@@ -7,7 +7,7 @@ namespace raptorfx {
 
 void DrumFxProcessor::prepare(double sampleRate, double tempoBpm) {
     sampleRate_ = sampleRate;
-    tempoBpm_ = tempoBpm;
+    tempoBpm_ = tempoBpm > 30.0 ? tempoBpm : 174.0;
 
     distortion_.setSampleRate(sampleRate_);
     breakcore_.setSampleRate(sampleRate_);
@@ -15,6 +15,11 @@ void DrumFxProcessor::prepare(double sampleRate, double tempoBpm) {
 
     setMacros(macros_);
     setAdvanced(advanced_);
+}
+
+void DrumFxProcessor::setTempoBpm(double tempoBpm) {
+    tempoBpm_ = tempoBpm > 30.0 ? tempoBpm : 174.0;
+    breakcore_.setTempoBpm(tempoBpm_);
 }
 
 void DrumFxProcessor::setMacros(const MacroParameters& macros) {

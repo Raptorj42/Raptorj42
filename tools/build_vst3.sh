@@ -21,6 +21,6 @@ cmake -S . -B "$BUILD_DIR" \
 
 cmake --build "$BUILD_DIR" --config Release
 
-echo "\nBuild finished. Looking for VST3 artifacts..."
+printf "\nBuild finished. Looking for VST3 artifacts...\n"
 find "$BUILD_DIR" -type d -name "*.vst3" -print || true
 find "$BUILD_DIR" -type f -name "*.vst3" -print || true

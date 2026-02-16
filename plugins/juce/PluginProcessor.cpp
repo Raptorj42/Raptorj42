@@ -5,16 +5,21 @@
 namespace {
 constexpr double kFallbackTempo = 174.0;
 
-juce::AudioParameterFloat* addFloat(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
+float readParam(juce::AudioProcessorValueTreeState& apvts, const char* id, float fallback) {
+    if (auto* p = apvts.getRawParameterValue(id)) {
+        return p->load();
+    }
+    return fallback;
+}
+
+void addFloat(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
                                     const juce::String& id,
                                     const juce::String& name,
                                     float min,
                                     float max,
                                     float def) {
     auto parameter = std::make_unique<juce::AudioParameterFloat>(id, name, min, max, def);
-    auto* raw = parameter.get();
     layout.add(std::move(parameter));
-    return raw;
 }
 }  // namespace
 
@@ -43,7 +48,7 @@ void RaptorBreakcoreAudioProcessor::processBlock(juce::AudioBuffer<float>& buffe
         buffer.clear(channel, 0, buffer.getNumSamples());
     }
 
-    engine_.prepare(getSampleRate(), resolveTempoBpm());
+    engine_.setTempoBpm(resolveTempoBpm());
     syncParametersFromAPVTS();
 
     if (buffer.getNumChannels() >= 2) {
@@ -106,18 +111,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout RaptorBreakcoreAudioProcesso
 
 void RaptorBreakcoreAudioProcessor::syncParametersFromAPVTS() {
     raptorfx::MacroParameters macros;
-    macros.damage = apvts_.getRawParameterValue("damage")->load();
-    macros.chaos = apvts_.getRawParameterValue("chaos")->load();
-    macros.tone = apvts_.getRawParameterValue("tone")->load();
-    macros.punch = apvts_.getRawParameterValue("punch")->load();
-    macros.mix = apvts_.getRawParameterValue("mix")->load();
-    macros.output = apvts_.getRawParameterValue("output")->load();
+    macros.damage = readParam(apvts_, "damage", 0.35F);
+    macros.chaos = readParam(apvts_, "chaos", 0.20F);
+    macros.tone = readParam(apvts_, "tone", 0.50F);
+    macros.punch = readParam(apvts_, "punch", 0.30F);
+    macros.mix = readParam(apvts_, "mix", 0.65F);
+    macros.output = readParam(apvts_, "output", 0.80F);
 
     raptorfx::AdvancedParameters advanced;
-    advanced.retriggerProbability = apvts_.getRawParameterValue("retriggerProbability")->load();
-    advanced.reverseProbability = apvts_.getRawParameterValue("reverseProbability")->load();
-    advanced.gateDepth = apvts_.getRawParameterValue("gateDepth")->load();
-    advanced.safetyLimiterEnabled = apvts_.getRawParameterValue("safetyLimiterEnabled")->load() > 0.5F;
+    advanced.retriggerProbability = readParam(apvts_, "retriggerProbability", 0.12F);
+    advanced.reverseProbability = readParam(apvts_, "reverseProbability", 0.05F);
+    advanced.gateDepth = readParam(apvts_, "gateDepth", 0.25F);
+    advanced.safetyLimiterEnabled = readParam(apvts_, "safetyLimiterEnabled", 1.0F) > 0.5F;
 
     engine_.setMacros(macros);
     engine_.setAdvanced(advanced);
